@@ -1,3 +1,7 @@
+from typing import List
+
+from src.parser import FunctionDefinition
+
 
 def generate_bindings_python_file(functions: List[FunctionDefinition], dll_name: str) -> str:
     header = "#This file was automatically generated with genc.py\n"
