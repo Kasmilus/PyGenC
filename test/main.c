@@ -15,11 +15,15 @@ Block comment!
 #define DLL_EXPORT __declspec(dllexport)
 
 
+// Simple function. Takes no arguments, returns nothing
 DLL_EXPORT
 void simple_function(void){
     printf("Simple function. Takes no arguments, returns nothing");
 }
 
+/*
+  Simple function. Takes no arguments, returns an int (72)
+*/
 DLL_EXPORT
 int function_with_return_value(void){
     printf("Simple function. Takes no arguments, returns an int");
@@ -49,12 +53,12 @@ void function_which_modifies_ptr_arg(int* num){
 }
 
 DLL_EXPORT
-char* function_with_multiple_args(char* str, int num){
+char* function_with_multiple_args(char* s, int num){
     printf("Function which takes a char* and num, returns string constructed from that");
 
     int str_size = 64;
     char* val = (char*)malloc(str_size*sizeof(char));
-    sprintf(val, "Result: %s, %i", str, num);
+    sprintf(val, "Result: %s, %i", s, num);
 
     return val;
 }

@@ -19,14 +19,15 @@ def generate_bindings_python_file(functions: List[FunctionDefinition], dll_name:
     # Create dictionary with ctypes function objects (actual callables to the DLL)
     func_list = "_functions = {"
     for f in functions:
-        func_list += f"\n    \"{f.name}\": _create_function_object(\"{f.name}\", {f.params}, {f.return_type}),"
+        # TODO: pass correct params instead of [] ({f.params} is not correct right now) - same for {f.return_type}
+        func_list += f"\n    \"{f.name}\": _create_function_object(\"{f.name}\", [], None),"
     func_list += "\n}\n"
 
     # Create definitions calling objects in the func_list dictionary. This is so we can get useful type info when using this lib from an IDE.
     func_definitions = ""
     for f in functions:
         func_definitions += "\n"
-        func_definitions += f"def {f.name}({f.get_params_as_str()}) -> {f.return_type}:\n"
+        func_definitions += f"def {f.name}({f.get_params_as_str()}) -> {f.get_ret_type_as_str()}:\n"
         func_definitions += '    """\n'
         func_definitions += f"    {f.description}\n"
         func_definitions += '    """\n'

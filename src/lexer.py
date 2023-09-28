@@ -5,8 +5,11 @@
 # Warning: This is probably more convoluted than it needs to be
 # Warning: This code works :)
 
-from typing import List, Optional
+from typing import List, Optional, Union, Tuple
 from enum import Enum
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TokenType(Enum):
@@ -28,6 +31,7 @@ class TokenType(Enum):
     tStringLiteral = 12
     tLineComment = 13
     tBlockComment = 14
+    tComma = 15
 
 
 class Token:
@@ -41,7 +45,38 @@ class Token:
         return f"[{str(self.token_type)}]: {self.value}"
 
 
-def _check_for_simple_token(input: str, i: int) -> Optional[Token]:
+class TokenStream:
+    def __init__(self, token_list: List[Token]):
+        self.token_list = token_list
+        self.current_token = 0
+
+    def __len__(self):
+        return len(self.token_list)
+
+    def is_end_of_stream(self):
+        return self.current_token >= len(self.token_list)
+
+    def get_token(self) -> Optional[Token]:
+        if self.is_end_of_stream():
+            raise Exception("Can't get token, reached end of stream!")
+
+        token = self.token_list[self.current_token]
+        self.current_token += 1
+        return token
+
+    def peek_token(self) -> Token:
+        if self.is_end_of_stream():
+            raise Exception("Can't get token, reached end of stream!")
+
+        token = self.token_list[self.current_token]
+        return token
+
+
+_type_keywords_list = ('void', 'int', 'float', 'double', 'char')
+_keywords_list = _type_keywords_list + ("struct", "return")
+_preprocessor_list = ("#include", "#if", "#endif", "#define", "#pragma")
+
+def _check_for_simple_token(input: str, i: int) -> Union[Token, Tuple]:
     """ Check for single character token or whitespace """
     if input[i] == '*':
         token = Token(TokenType.tAsterisk)
@@ -67,13 +102,14 @@ def _check_for_simple_token(input: str, i: int) -> Optional[Token]:
     elif input[i] == ';':
         token = Token(TokenType.tSemicolon)
         return token
+    elif input[i] == ',':
+        token = Token(TokenType.tComma)
+        return token
     elif input[i].isspace():
         return None, True
 
     return None, False
 
-_keywords_list = ("void", "int", "float", "char", "struct", "return")
-_preprocessor_list = ("#include", "#if", "#endif", "#define", "#pragma")
 
 def _get_next_token(input: str, i: int, token_list: List[Token]) -> int:
 
@@ -138,7 +174,7 @@ def _get_next_token(input: str, i: int, token_list: List[Token]) -> int:
         return end_idx
 
 
-def get_token_list(input: str) -> List[Token]:
+def get_token_stream(input: str) -> TokenStream:
     token_list = []
 
     i = 0
@@ -148,4 +184,4 @@ def get_token_list(input: str) -> List[Token]:
         if i >= input_len:
             break
 
-    return token_list
+    return TokenStream(token_list)
